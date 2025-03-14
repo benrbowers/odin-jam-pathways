@@ -38,6 +38,13 @@ Hyper_Path :: struct {
 	lines: [dynamic]Hyper_Line,
 }
 
+Hyper_Cube :: struct {
+	color:      Hyper_Color,
+	path:       Hyper_Path,
+	start_tile: Vector2i,
+	position:   rl.Vector2,
+}
+
 opacity :: proc(percent: u32) -> rl.Color {
 	if percent > 100 do return rl.WHITE
 

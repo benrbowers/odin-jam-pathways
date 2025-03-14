@@ -25,6 +25,14 @@ line_sprite_paths: [Line_Type][Hyper_Color]cstring = {
 }
 line_sprites: [Line_Type][Hyper_Color]rl.Texture2D = #partial{}
 
+cube_sprite_paths: [Hyper_Color]cstring = {
+	.GREEN = "sprites/cube-green.png",
+	.BLUE  = "sprites/cube-blue.png",
+	.PINK  = "sprites/cube-pink.png",
+	.RED   = "sprites/cube-red.png",
+}
+cube_sprites: [Hyper_Color]rl.Texture2D
+
 load_line_sprites :: proc() {
 	for type in Line_Type {
 		for color in Hyper_Color {
@@ -35,11 +43,21 @@ load_line_sprites :: proc() {
 			line_sprites[type][color] = sprite
 		}
 	}
+	for color in Hyper_Color {
+		path := cube_sprite_paths[color]
+		sprite := rl.LoadTexture(path)
+
+		assert(sprite.id > 0, fmt.tprint("Failed to load:", path))
+		cube_sprites[color] = sprite
+	}
 }
 unload_line_sprites :: proc() {
 	for type in Line_Type {
 		for color in Hyper_Color {
 			rl.UnloadTexture(line_sprites[type][color])
 		}
+	}
+	for color in Hyper_Color {
+		rl.UnloadTexture(cube_sprites[color])
 	}
 }
