@@ -14,6 +14,8 @@ Available_Levels :: enum {
 }
 selected_level := Available_Levels.ONE
 
+selection_menu_open: bool = false
+
 user_hit_play: bool = false
 user_released_play: bool = false
 
@@ -30,6 +32,8 @@ selected_cube: ^lines.Hyper_Cube
 cubes := [dynamic]lines.Hyper_Cube{}
 
 reset :: proc() {
+	selection_menu_open = false
+
 	user_hit_play = false
 	user_released_play = false
 
@@ -67,6 +71,7 @@ main :: proc() {
 	defer CloseWindow()
 
 	SetTargetFPS(60)
+	SetExitKey(.KEY_NULL)
 
 	checker_texture := LoadTexture("sprites/checker.png")
 	assert(checker_texture.id > 0, "Could not load checker texture.")
@@ -93,13 +98,17 @@ main :: proc() {
 	// - [X] Connect path to goal when at goal
 	// - [X] Play button
 	// - [X] Reset button
-	// - [ ] "COMPLETE" text when you win
+	// - [X] "COMPLETE" text when you win
 	reload()
 
 	for !WindowShouldClose() {
 		time := GetTime()
 		mouse_world := GetScreenToWorld2D(GetMousePosition(), camera)
 		mouse_tile := tiles.world_to_tile(mouse_world)
+
+		if IsKeyPressed(.ESCAPE) {
+			selection_menu_open = !selection_menu_open
+		}
 
 		is_button_pressed := ui.is_button_pressed(mouse_world)
 
@@ -209,6 +218,8 @@ main :: proc() {
 		ui.draw_button(animation_mode, is_button_pressed)
 
 		EndMode2D()
+		DrawText("ESC for Menu", 10, 10, 16, WHITE)
+
 		if user_has_won {
 			DrawRectangle(
 				0,
@@ -227,6 +238,65 @@ main :: proc() {
 				100,
 				WHITE,
 			)
+		}
+
+		if selection_menu_open {
+			DrawRectangle(
+				0,
+				0,
+				const.WINDOW_WIDTH,
+				const.WINDOW_HEIGHT,
+				Color{0, 3, 60, 255},
+			)
+			menu_title: cstring = "HYPERLINES"
+			measure := MeasureText(menu_title, 80)
+			DrawText(
+				menu_title,
+				(const.WINDOW_WIDTH - measure) / 2,
+				40,
+				80,
+				WHITE,
+			)
+			menu_subtitle: cstring = "Select Level"
+			measure = MeasureText(menu_subtitle, 40)
+			DrawText(
+				menu_subtitle,
+				(const.WINDOW_WIDTH - measure) / 2,
+				150,
+				40,
+				WHITE,
+			)
+			level_rects := [Available_Levels]Rectangle{}
+			for level, i in Available_Levels {
+				level_text: cstring = fmt.ctprint("Level", level)
+				measure = MeasureText(level_text, 20)
+				DrawText(
+					level_text,
+					(const.WINDOW_WIDTH - measure) / 2,
+					i32(220 + i * 40),
+					20,
+					WHITE,
+				)
+				level_rects[level] = Rectangle {
+					x      = f32((const.WINDOW_WIDTH - measure) / 2),
+					y      = f32(220 + i * 40),
+					width  = f32(measure),
+					height = 20,
+				}
+			}
+
+			if IsMouseButtonDown(.LEFT) {
+				for level, i in Available_Levels {
+					if CheckCollisionPointRec(
+						GetMousePosition(),
+						level_rects[level],
+					) {
+						selected_level = level
+						reset()
+						reload()
+					}
+				}
+			}
 		}
 		EndDrawing()
 	}
