@@ -3,7 +3,7 @@ package tiles
 import "core:fmt"
 import rl "vendor:raylib"
 
-tile_sprite_paths: [Tile_Type]cstring = {
+tile_sprite_paths := [Tile_Type]cstring {
 	.FLOOR       = "",
 	.WALL        = "sprites/wall.png",
 	.HOLE        = "sprites/hole.png",
@@ -17,7 +17,7 @@ tile_sprite_paths: [Tile_Type]cstring = {
 	.GOAL_PINK   = "sprites/goal-pink.png",
 	.GOAL_RED    = "sprites/goal-red.png",
 }
-tile_sprites: [Tile_Type]rl.Texture2D
+tile_sprites := [Tile_Type]rl.Texture2D{}
 
 
 load_tile_sprites :: proc() {

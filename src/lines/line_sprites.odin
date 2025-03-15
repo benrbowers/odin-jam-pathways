@@ -3,7 +3,7 @@ package lines
 import "core:fmt"
 import rl "vendor:raylib"
 
-line_sprite_paths: [Line_Type][Hyper_Color]cstring = {
+line_sprite_paths := [Line_Type][Hyper_Color]cstring {
 	.LINE = {
 		.GREEN = "sprites/line-green.png",
 		.BLUE = "sprites/line-blue.png",
@@ -29,7 +29,7 @@ line_sprite_paths: [Line_Type][Hyper_Color]cstring = {
 		.RED = "sprites/end-red.png",
 	},
 }
-line_sprites: [Line_Type][Hyper_Color]rl.Texture2D = #partial{}
+line_sprites := [Line_Type][Hyper_Color]rl.Texture2D{}
 
 cube_sprite_paths: [Hyper_Color]cstring = {
 	.GREEN = "sprites/cube-green.png",

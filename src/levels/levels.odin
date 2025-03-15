@@ -81,7 +81,10 @@ load_current_cubes :: proc(cubes: ^[dynamic]lines.Hyper_Cube) {
 get_tile :: proc(level: Level, tile: tiles.Vector2i) -> tiles.Tile_Type {
 	if !level.is_loaded do return .FLOOR
 
+	if tile.x < 0 do return .FLOOR
 	if int(tile.x) >= len(level.tiles) do return .FLOOR
+
+	if tile.y < 0 do return .FLOOR
 	if int(tile.y) >= len(level.tiles[0]) do return .FLOOR
 
 	return level.tiles[tile.x][tile.y]
