@@ -9,6 +9,7 @@ import rl "vendor:raylib"
 Vector2i :: [2]i32
 
 PREVIEW_PULSE :: 5.0
+CUBE_SPEED :: 25.0
 
 Orientation :: enum {
 	UP,
@@ -39,10 +40,11 @@ Hyper_Line :: struct {
 }
 
 Hyper_Cube :: struct {
-	color:      Hyper_Color,
-	path:       [dynamic]Hyper_Line,
-	start_tile: Vector2i,
-	position:   rl.Vector2,
+	color:              Hyper_Color,
+	path:               [dynamic]Hyper_Line,
+	start_tile:         Vector2i,
+	position:           rl.Vector2,
+	animation_finished: bool,
 }
 
 opacity :: proc(percent: u32) -> rl.Color {
@@ -196,4 +198,90 @@ draw_cube_path :: proc(cube: Hyper_Cube) {
 	for line in cube.path {
 		draw_line(line, cube.color)
 	}
+}
+
+animate_cube_path :: proc(cube: ^Hyper_Cube, delta_time: f64) {
+	if len(cube.path) == 0 {
+		return
+	}
+	if cube.animation_finished {
+		return
+	}
+	// Distance travelled per tile is tile size, TURNS INCLUDED
+	path_len := len(cube.path)
+	last_line := cube.path[path_len - 1]
+	offset: f64 = 0.0
+	if last_line.type == .END {
+		offset = const.TILE_SIZE / 2
+	}
+
+	distance_travelled := delta_time * CUBE_SPEED
+	path_distance := f64(path_len) * const.TILE_SIZE - offset
+
+	if distance_travelled >= path_distance {
+		last_tile: tiles.Vector2i
+		if last_line.type == .END {
+			last_tile = last_line.tile
+		} else {
+			orientation := last_line.orientation
+			switch last_line.type {
+			case .LINE:
+				dir := orientation_vector[orientation]
+				last_tile = last_line.tile + dir
+			case .TURN_RIGHT:
+				dir := orientation_vector[turn_right(orientation)]
+				last_tile = last_line.tile + dir
+			case .TURN_LEFT:
+				dir := orientation_vector[turn_left(orientation)]
+				last_tile = last_line.tile + dir
+			case .END:
+			}
+		}
+		pos := tiles.tile_center(last_tile)
+		cube.position = pos
+		cube.animation_finished = true
+		return
+	}
+
+	line_index: int = int(math.floor(distance_travelled / const.TILE_SIZE))
+	current_line := cube.path[line_index]
+
+	distance_remaining :=
+		f64(line_index + 1) * const.TILE_SIZE - distance_travelled
+	dir := orientation_vector[current_line.orientation]
+	dif_center: f32 = (const.TILE_SIZE / 2 - f32(distance_remaining))
+	pos := tiles.tile_center(current_line.tile)
+
+	switch current_line.type {
+	case .END:
+		fallthrough
+	case .LINE:
+		pos += rl.Vector2{f32(dir.x), f32(dir.y)} * dif_center
+	case .TURN_RIGHT:
+		if dif_center < 0 {
+			pos += rl.Vector2{f32(dir.x), f32(dir.y)} * dif_center
+		} else {
+			right_dir :=
+				orientation_vector[turn_right(current_line.orientation)]
+			pos += rl.Vector2{f32(right_dir.x), f32(right_dir.y)} * dif_center
+		}
+	case .TURN_LEFT:
+		if dif_center < 0 {
+			pos += rl.Vector2{f32(dir.x), f32(dir.y)} * dif_center
+		} else {
+			left_dir := orientation_vector[turn_left(current_line.orientation)]
+			pos += rl.Vector2{f32(left_dir.x), f32(left_dir.y)} * dif_center
+		}
+	}
+
+	cube.position = pos
+}
+
+done_animating :: proc(cubes: [dynamic]Hyper_Cube) -> bool {
+	for cube in cubes {
+		if !cube.animation_finished {
+			return false
+		}
+	}
+	return true
 }

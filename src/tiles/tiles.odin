@@ -40,3 +40,10 @@ draw_tile :: proc(tile_type: Tile_Type, tile_pos: Vector2i) {
 		rl.WHITE,
 	)
 }
+
+tile_center :: proc(tile_pos: Vector2i) -> rl.Vector2 {
+	pos := rl.Vector2{f32(tile_pos.x), f32(tile_pos.y)}
+	pos *= const.TILE_SIZE
+	pos += const.TILE_SIZE / 2
+	return pos
+}

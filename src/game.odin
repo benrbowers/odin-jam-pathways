@@ -20,7 +20,10 @@ user_released_play: bool = false
 user_hit_reset: bool = false
 user_released_reset: bool = false
 
+user_has_won: bool = false
+
 animation_mode: bool = false
+animation_start: f64 = 0.0
 preview_mode: bool = false
 selected_cube: ^lines.Hyper_Cube
 
@@ -33,7 +36,10 @@ reset :: proc() {
 	user_hit_reset = false
 	user_released_reset = false
 
+	user_has_won = false
+
 	animation_mode = false
+	animation_start = 0.0
 	preview_mode = false
 	selected_cube = nil
 }
@@ -117,6 +123,7 @@ main :: proc() {
 			}
 			if user_released_play {
 				animation_mode = true
+				animation_start = time
 			}
 		}
 
@@ -142,7 +149,23 @@ main :: proc() {
 			}
 
 			if animation_mode {
-				// TODO: Animation mode
+				delta_time := time - animation_start
+				for &cube in cubes {
+					lines.animate_cube_path(&cube, delta_time)
+				}
+				if lines.done_animating(cubes) {
+					score: int = 0
+					for cube in cubes {
+						if len(cube.path) == 0 do continue
+						last_line := cube.path[len(cube.path) - 1]
+						if last_line.type != .END {
+							score += 1
+						}
+					}
+					if score == levels.count_current_goals() {
+						user_has_won = true
+					}
+				}
 			} else {
 				// Path drawing mode
 				preview_line, preview_cube, preview_ok := levels.get_next_line(
@@ -186,6 +209,25 @@ main :: proc() {
 		ui.draw_button(animation_mode, is_button_pressed)
 
 		EndMode2D()
+		if user_has_won {
+			DrawRectangle(
+				0,
+				0,
+				const.WINDOW_WIDTH,
+				const.WINDOW_HEIGHT,
+				Color{0, 0, 0, 125},
+			)
+
+			win_text: cstring = "COMPLETE!"
+			measure := MeasureText(win_text, 100)
+			DrawText(
+				win_text,
+				(const.WINDOW_WIDTH - measure) / 2,
+				(const.WINDOW_HEIGHT - 100) / 2,
+				100,
+				WHITE,
+			)
+		}
 		EndDrawing()
 	}
 }

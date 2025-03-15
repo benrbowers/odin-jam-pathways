@@ -172,3 +172,26 @@ get_next_line :: proc(
 	}
 	return lines.Hyper_Line{}, nil, false
 }
+
+goal_tiles :: []tiles.Tile_Type {
+	.GOAL_GREEN,
+	.GOAL_BLUE,
+	.GOAL_PINK,
+	.GOAL_RED,
+}
+
+count_goals :: proc(level: Level) -> int {
+	count: int = 0
+	for row in level.tiles {
+		for tile in row {
+			if slice.contains(goal_tiles, tile) {
+				count += 1
+			}
+		}
+	}
+	return count
+}
+
+count_current_goals :: proc() -> int {
+	return count_goals(current_level)
+}
