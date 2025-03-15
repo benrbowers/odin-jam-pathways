@@ -3,11 +3,9 @@ package tiles
 import "core:fmt"
 import rl "vendor:raylib"
 
-tile_sprite_paths := [Tile_Type]cstring {
-	.FLOOR       = "",
+tile_sprite_paths := #partial [Tile_Type]cstring {
 	.WALL        = "sprites/wall.png",
 	.HOLE        = "sprites/hole.png",
-	.WALL_BROKEN = "sprites/wall.png",
 	.START_GREEN = "sprites/start-green.png",
 	.START_BLUE  = "sprites/start-blue.png",
 	.START_PINK  = "sprites/start-pink.png",
@@ -21,10 +19,9 @@ tile_sprites := [Tile_Type]rl.Texture2D{}
 
 
 load_tile_sprites :: proc() {
-	for type in Tile_Type {
-		if type == .FLOOR do continue
+	for path, type in tile_sprite_paths {
+		if path == "" do continue
 
-		path := tile_sprite_paths[type]
 		sprite := rl.LoadTexture(path)
 
 		assert(sprite.id > 0, fmt.tprint("Failed to load:", path))
@@ -32,8 +29,8 @@ load_tile_sprites :: proc() {
 	}
 }
 unload_tile_sprites :: proc() {
-	for type in Tile_Type {
-		if type == .FLOOR do continue
+	for path, type in tile_sprite_paths {
+		if path == "" do continue
 
 		rl.UnloadTexture(tile_sprites[type])
 	}

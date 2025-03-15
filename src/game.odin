@@ -10,6 +10,7 @@ import "vendor:raylib"
 
 Available_Levels :: enum {
 	ONE,
+	FOUR,
 }
 selected_level := Available_Levels.ONE
 
@@ -35,9 +36,6 @@ reset :: proc() {
 	animation_mode = false
 	preview_mode = false
 	selected_cube = nil
-
-	clear(&cubes)
-	levels.load_current_cubes(&cubes)
 }
 
 reload :: proc() {
@@ -48,7 +46,12 @@ reload :: proc() {
 	switch selected_level {
 	case .ONE:
 		levels.load_level1()
+	case .FOUR:
+		levels.load_level4()
 	}
+
+	clear(&cubes)
+	levels.load_current_cubes(&cubes)
 }
 
 main :: proc() {
@@ -85,8 +88,7 @@ main :: proc() {
 	// - [X] Play button
 	// - [X] Reset button
 	// - [ ] "COMPLETE" text when you win
-	levels.load_level1()
-	levels.load_current_cubes(&cubes)
+	reload()
 
 	for !WindowShouldClose() {
 		time := GetTime()
@@ -104,6 +106,7 @@ main :: proc() {
 			}
 			if user_released_reset {
 				reset()
+				reload()
 			}
 		} else {
 			if is_button_pressed && !user_hit_play {
@@ -121,18 +124,22 @@ main :: proc() {
 		ClearBackground(Color{0, 3, 60, 255})
 
 		BeginMode2D(camera)
-		for i: i32 = 0; i < const.CHECKER_WIDTH; i += 1 {
-			for j: i32 = 0; j < const.CHECKER_HEIGHT; j += 1 {
-				DrawTexture(
-					checker_texture,
-					i * const.CHECKER_SIZE,
-					j * const.CHECKER_SIZE,
-					WHITE,
-				)
-			}
-		}
+		// for i: i32 = 0; i < const.CHECKER_WIDTH; i += 1 {
+		// 	for j: i32 = 0; j < const.CHECKER_HEIGHT; j += 1 {
+		// 		DrawTexture(
+		// 			checker_texture,
+		// 			i * const.CHECKER_SIZE,
+		// 			j * const.CHECKER_SIZE,
+		// 			WHITE,
+		// 		)
+		// 	}
+		// }
 		if levels.current_level.is_loaded {
 			levels.draw_current_level()
+			for cube in cubes {
+				// Paths first so previews are on top
+				lines.draw_cube_path(cube)
+			}
 
 			if animation_mode {
 				// TODO: Animation mode
@@ -157,6 +164,10 @@ main :: proc() {
 							}
 						}
 						append(&preview_cube.path, preview_line)
+
+						path_tile := lines.cube_path_tiles[preview_cube.color]
+						levels.set_current_tile(mouse_tile, path_tile)
+
 						selected_cube = nil
 						preview_mode = false
 					}
@@ -168,10 +179,9 @@ main :: proc() {
 			}
 
 			for cube in cubes {
-				lines.draw_cube_path(cube)
 				lines.draw_cube(cube)
 			}
-		}
+		} // End of level drawing
 
 		ui.draw_button(animation_mode, is_button_pressed)
 

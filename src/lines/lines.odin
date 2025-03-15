@@ -77,12 +77,21 @@ turn_left :: proc(orientation: Orientation) -> Orientation {
 	}
 	return orientation - Orientation(1)
 }
+turn_reverse :: proc(orientation: Orientation) -> Orientation {
+	return turn_right(turn_right(orientation))
+}
 
-cube_goal_tiles: [Hyper_Color]tiles.Tile_Type = {
+cube_goal_tiles := [Hyper_Color]tiles.Tile_Type {
 	.GREEN = .GOAL_GREEN,
 	.BLUE  = .GOAL_BLUE,
 	.PINK  = .GOAL_PINK,
 	.RED   = .GOAL_RED,
+}
+cube_path_tiles := [Hyper_Color]tiles.Tile_Type {
+	.GREEN = .PATH_GREEN,
+	.BLUE  = .PATH_BLUE,
+	.PINK  = .PATH_PINK,
+	.RED   = .PATH_RED,
 }
 
 show_line_preview :: proc(

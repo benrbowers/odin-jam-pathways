@@ -19,6 +19,10 @@ Tile_Type :: enum {
 	GOAL_BLUE,
 	GOAL_PINK,
 	GOAL_RED,
+	PATH_GREEN,
+	PATH_BLUE,
+	PATH_PINK,
+	PATH_RED,
 }
 
 world_to_tile :: proc(world_pos: rl.Vector2) -> Vector2i {

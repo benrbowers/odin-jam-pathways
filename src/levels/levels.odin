@@ -1,5 +1,6 @@
 package levels
 
+import "core:slice"
 import "src:const"
 import "src:lines"
 import "src:tiles"
@@ -94,6 +95,17 @@ get_current_tile :: proc(tile: tiles.Vector2i) -> tiles.Tile_Type {
 	return get_tile(current_level, tile)
 }
 
+set_current_tile :: proc(tile: tiles.Vector2i, type: tiles.Tile_Type) {
+	current_level.tiles[tile.x][tile.y] = type
+}
+
+path_tiles :: []tiles.Tile_Type {
+	.PATH_GREEN,
+	.PATH_BLUE,
+	.PATH_PINK,
+	.PATH_RED,
+}
+
 get_next_line :: proc(
 	mouse_tile: tiles.Vector2i,
 	cubes: [dynamic]lines.Hyper_Cube,
@@ -102,14 +114,38 @@ get_next_line :: proc(
 	^lines.Hyper_Cube,
 	bool,
 ) {
+	mouse_tile_type := get_current_tile(mouse_tile)
+
 	for &cube in cubes {
 		if mouse_tile == cube.start_tile do continue
 
-		last_tile: tiles.Vector2i
+		if cube.color == .PINK {
+			if mouse_tile_type != .FLOOR &&
+			   !slice.contains(path_tiles, mouse_tile_type) {
+				// Pink may be placed on other colors
+				continue
+			}
+		} else {
+			if mouse_tile_type != .FLOOR && mouse_tile_type != .PATH_PINK {
+				// Other colors may be placed on pink
+				continue
+			}
+		}
+
+		last_tile := tiles.Vector2i{-1, -1}
+		prev_tile := tiles.Vector2i{-1, -1}
 		if len(cube.path) == 0 {
 			last_tile = cube.start_tile
 		} else {
 			last_tile = cube.path[len(cube.path) - 1].tile
+			if len(cube.path) > 1 {
+				prev_tile = cube.path[len(cube.path) - 2].tile
+			}
+		}
+
+		if mouse_tile == prev_tile {
+			// Prevent placing a line on top of itself
+			continue
 		}
 
 		for dir, orient in lines.orientation_vector {
