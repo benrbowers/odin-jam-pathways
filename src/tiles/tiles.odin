@@ -9,6 +9,7 @@ Vector2i :: [2]i32
 Tile_Type :: enum {
 	FLOOR,
 	WALL,
+	WALL_BROKEN,
 	HOLE,
 	START_GREEN,
 	START_BLUE,

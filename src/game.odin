@@ -37,12 +37,19 @@ main :: proc() {
 	selected_cube: ^lines.Hyper_Cube
 	cubes: [dynamic]lines.Hyper_Cube = {}
 
+
+	// TODO: Finish minimum game loop for level 1
+	// - [X] Connect path to goal when at goal
+	// - [ ] Play button
+	// - [ ] Reset button
+	// - [ ] "COMPLETE" text when you win
 	levels.load_level1()
 	levels.load_current_cubes(&cubes)
 
 	for !WindowShouldClose() {
 		time := GetTime()
 		mouse := GetScreenToWorld2D(GetMousePosition(), camera)
+		mouse_tile := tiles.world_to_tile(mouse)
 
 		BeginDrawing()
 		ClearBackground(Color{0, 3, 60, 255})
@@ -58,37 +65,39 @@ main :: proc() {
 				)
 			}
 		}
-		levels.draw_current_level()
-		preview_line, preview_cube, preview_ok := lines.get_next_line(
-			tiles.world_to_tile(mouse),
-			cubes,
-		)
-		if preview_ok {
-			preview_mode = true
-			selected_cube = preview_cube
-			lines.show_line_preview(preview_line, preview_cube, time)
-			if IsMouseButtonDown(.LEFT) {
-				// Place line on click
-				if len(preview_cube.path) > 0 {
-					last_line := &preview_cube.path[len(preview_cube.path) - 1]
-					preview_type, type_ok := last_line.preview_type.?
-					if type_ok {
-						last_line.type = preview_type
-						last_line.preview_type = nil
+		if levels.current_level.is_loaded {
+			levels.draw_current_level()
+			preview_line, preview_cube, preview_ok := levels.get_next_line(
+				mouse_tile,
+				cubes,
+			)
+			if preview_ok {
+				preview_mode = true
+				selected_cube = preview_cube
+				lines.show_line_preview(preview_line, preview_cube, time)
+				if IsMouseButtonDown(.LEFT) {
+					// Place line on click
+					if len(preview_cube.path) > 0 {
+						last_line := &preview_cube.path[len(preview_cube.path) - 1]
+						preview_type, type_ok := last_line.preview_type.?
+						if type_ok {
+							last_line.type = preview_type
+							last_line.preview_type = nil
+						}
 					}
+					append(&preview_cube.path, preview_line)
+					selected_cube = nil
+					preview_mode = false
 				}
-				append(&preview_cube.path, preview_line)
+			} else if preview_mode {
+				lines.straighten_cube_path(selected_cube)
 				selected_cube = nil
 				preview_mode = false
 			}
-		} else if preview_mode {
-			lines.straighten_cube_path(selected_cube)
-			selected_cube = nil
-			preview_mode = false
-		}
-		for cube in cubes {
-			lines.draw_cube_path(cube)
-			lines.draw_cube(cube)
+			for cube in cubes {
+				lines.draw_cube_path(cube)
+				lines.draw_cube(cube)
+			}
 		}
 		EndMode2D()
 

@@ -7,6 +7,7 @@ tile_sprite_paths: [Tile_Type]cstring = {
 	.FLOOR       = "",
 	.WALL        = "sprites/wall.png",
 	.HOLE        = "sprites/hole.png",
+	.WALL_BROKEN = "sprites/wall.png",
 	.START_GREEN = "sprites/start-green.png",
 	.START_BLUE  = "sprites/start-blue.png",
 	.START_PINK  = "sprites/start-pink.png",

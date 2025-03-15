@@ -3,6 +3,7 @@ package lines
 import "core:fmt"
 import "core:math"
 import "src:const"
+import "src:tiles"
 import rl "vendor:raylib"
 
 Vector2i :: [2]i32
@@ -75,6 +76,13 @@ turn_left :: proc(orientation: Orientation) -> Orientation {
 		return Orientation(len(Orientation) - 1)
 	}
 	return orientation - Orientation(1)
+}
+
+cube_goal_tiles: [Hyper_Color]tiles.Tile_Type = {
+	.GREEN = .GOAL_GREEN,
+	.BLUE  = .GOAL_BLUE,
+	.PINK  = .GOAL_PINK,
+	.RED   = .GOAL_RED,
 }
 
 show_line_preview :: proc(
@@ -179,31 +187,4 @@ draw_cube_path :: proc(cube: Hyper_Cube) {
 	for line in cube.path {
 		draw_line(line, cube.color)
 	}
-}
-
-get_next_line :: proc(
-	mouse_tile: Vector2i,
-	cubes: [dynamic]Hyper_Cube,
-) -> (
-	Hyper_Line,
-	^Hyper_Cube,
-	bool,
-) {
-	for &cube in cubes {
-		if mouse_tile == cube.start_tile do continue
-
-		last_tile: Vector2i
-		if len(cube.path) == 0 {
-			last_tile = cube.start_tile
-		} else {
-			last_tile = cube.path[len(cube.path) - 1].tile
-		}
-
-		for dir, orient in orientation_vector {
-			if mouse_tile == last_tile + dir {
-				return Hyper_Line{.END, orient, nil, mouse_tile}, &cube, true
-			}
-		}
-	}
-	return Hyper_Line{}, nil, false
 }
