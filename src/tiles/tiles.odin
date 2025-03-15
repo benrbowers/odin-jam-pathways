@@ -2,28 +2,36 @@ package tiles
 
 import "core:fmt"
 import "src:const"
-import "src:lines"
 import rl "vendor:raylib"
 
-Vector2i :: [2]int
+Vector2i :: [2]i32
 
 Tile_Type :: enum {
+	FLOOR,
 	WALL,
 	HOLE,
-	GREEN_GOAL,
-	BLUE_GOAL,
-	PINK_GOAL,
-	RED_GOAL,
-}
-
-Tile :: struct {
-	type:     Tile_Type,
-	position: Vector2i,
+	START_GREEN,
+	START_BLUE,
+	START_PINK,
+	START_RED,
+	GOAL_GREEN,
+	GOAL_BLUE,
+	GOAL_PINK,
+	GOAL_RED,
 }
 
 world_to_tile :: proc(world_pos: rl.Vector2) -> Vector2i {
-	x := int(world_pos.x) / const.TILE_SIZE
-	y := int(world_pos.y) / const.TILE_SIZE
+	x := i32(world_pos.x) / const.TILE_SIZE
+	y := i32(world_pos.y) / const.TILE_SIZE
 
 	return Vector2i{x, y}
+}
+
+draw_tile :: proc(tile_type: Tile_Type, tile_pos: Vector2i) {
+	rl.DrawTexture(
+		tile_sprites[tile_type],
+		tile_pos.x * const.TILE_SIZE,
+		tile_pos.y * const.TILE_SIZE,
+		rl.WHITE,
+	)
 }

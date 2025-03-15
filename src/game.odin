@@ -2,6 +2,7 @@ package game
 
 import "core:fmt"
 import "src:const"
+import "src:levels"
 import "src:lines"
 import "src:tiles"
 import "vendor:raylib"
@@ -11,6 +12,8 @@ main :: proc() {
 
 	InitWindow(const.WINDOW_WIDTH, const.WINDOW_HEIGHT, "HYPERLINES")
 	defer CloseWindow()
+
+	SetTargetFPS(60)
 
 	checker_texture := LoadTexture("sprites/checker.png")
 	assert(checker_texture.id > 0, "Could not load checker texture.")
@@ -22,12 +25,20 @@ main :: proc() {
 	tiles.load_tile_sprites()
 	defer tiles.unload_tile_sprites()
 
+	offset := Vector2{const.WINDOW_HEIGHT, const.WINDOW_HEIGHT} / 2
+
 	camera := Camera2D {
 		zoom   = const.ZOOM,
-		offset = Vector2{const.WINDOW_WIDTH / 2, const.WINDOW_HEIGHT / 2},
-		target = Vector2{const.WINDOW_WIDTH / 2, const.WINDOW_HEIGHT / 2},
+		offset = offset,
+		target = offset / const.ZOOM,
 	}
 
+	preview_mode: bool = false
+	selected_cube: ^lines.Hyper_Cube
+	cubes: [dynamic]lines.Hyper_Cube = {}
+
+	levels.load_level1()
+	levels.load_current_cubes(&cubes)
 
 	for !WindowShouldClose() {
 		time := GetTime()
@@ -47,11 +58,38 @@ main :: proc() {
 				)
 			}
 		}
-		lines.show_line_preview(
-			{.END, .DOWN, tiles.world_to_tile(mouse)},
-			.RED,
-			time,
+		levels.draw_current_level()
+		preview_line, preview_cube, preview_ok := lines.get_next_line(
+			tiles.world_to_tile(mouse),
+			cubes,
 		)
+		if preview_ok {
+			preview_mode = true
+			selected_cube = preview_cube
+			lines.show_line_preview(preview_line, preview_cube, time)
+			if IsMouseButtonDown(.LEFT) {
+				// Place line on click
+				if len(preview_cube.path) > 0 {
+					last_line := &preview_cube.path[len(preview_cube.path) - 1]
+					preview_type, type_ok := last_line.preview_type.?
+					if type_ok {
+						last_line.type = preview_type
+						last_line.preview_type = nil
+					}
+				}
+				append(&preview_cube.path, preview_line)
+				selected_cube = nil
+				preview_mode = false
+			}
+		} else if preview_mode {
+			lines.straighten_cube_path(selected_cube)
+			selected_cube = nil
+			preview_mode = false
+		}
+		for cube in cubes {
+			lines.draw_cube_path(cube)
+			lines.draw_cube(cube)
+		}
 		EndMode2D()
 
 		EndDrawing()

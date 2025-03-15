@@ -10,11 +10,17 @@ line_sprite_paths: [Line_Type][Hyper_Color]cstring = {
 		.PINK = "sprites/line-pink.png",
 		.RED = "sprites/line-red.png",
 	},
-	.TURN = {
-		.GREEN = "sprites/turn-green.png",
-		.BLUE = "sprites/turn-blue.png",
-		.PINK = "sprites/turn-pink.png",
-		.RED = "sprites/turn-red.png",
+	.TURN_RIGHT = {
+		.GREEN = "sprites/turn-right-green.png",
+		.BLUE = "sprites/turn-right-blue.png",
+		.PINK = "sprites/turn-right-pink.png",
+		.RED = "sprites/turn-right-red.png",
+	},
+	.TURN_LEFT = {
+		.GREEN = "sprites/turn-left-green.png",
+		.BLUE = "sprites/turn-left-blue.png",
+		.PINK = "sprites/turn-left-pink.png",
+		.RED = "sprites/turn-left-red.png",
 	},
 	.END = {
 		.GREEN = "sprites/end-green.png",

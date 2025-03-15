@@ -1,22 +1,28 @@
 package tiles
 
 import "core:fmt"
-import "src:lines"
 import rl "vendor:raylib"
 
 tile_sprite_paths: [Tile_Type]cstring = {
-	.WALL       = "sprites/wall.png",
-	.HOLE       = "sprites/hole.png",
-	.GREEN_GOAL = "sprites/goal-green.png",
-	.BLUE_GOAL  = "sprites/goal-blue.png",
-	.PINK_GOAL  = "sprites/goal-pink.png",
-	.RED_GOAL   = "sprites/goal-red.png",
+	.FLOOR       = "",
+	.WALL        = "sprites/wall.png",
+	.HOLE        = "sprites/hole.png",
+	.START_GREEN = "sprites/start-green.png",
+	.START_BLUE  = "sprites/start-blue.png",
+	.START_PINK  = "sprites/start-pink.png",
+	.START_RED   = "sprites/start-red.png",
+	.GOAL_GREEN  = "sprites/goal-green.png",
+	.GOAL_BLUE   = "sprites/goal-blue.png",
+	.GOAL_PINK   = "sprites/goal-pink.png",
+	.GOAL_RED    = "sprites/goal-red.png",
 }
 tile_sprites: [Tile_Type]rl.Texture2D
 
 
 load_tile_sprites :: proc() {
 	for type in Tile_Type {
+		if type == .FLOOR do continue
+
 		path := tile_sprite_paths[type]
 		sprite := rl.LoadTexture(path)
 
@@ -26,6 +32,8 @@ load_tile_sprites :: proc() {
 }
 unload_tile_sprites :: proc() {
 	for type in Tile_Type {
+		if type == .FLOOR do continue
+
 		rl.UnloadTexture(tile_sprites[type])
 	}
 }
